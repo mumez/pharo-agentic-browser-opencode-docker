@@ -4,7 +4,7 @@ An all-in-one development container for AI-assisted Smalltalk development.
 
 As long as Docker is installed, you can start developing right away. The container packages:
 
-- **Pharo** ([AgenticBrowser](https://github.com/mumez/pharo-agentic-browser) + SmalltalkInteropServer)
+- **Pharo** ([AgenticBrowser](https://github.com/mumez/pharo-agentic-browser) + [SmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer))
 - **OpenCode** ([smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin))
 
 The only thing you need to bring is your coding agent's credentials (e.g. an Anthropic API key).
