@@ -1,0 +1,78 @@
+{
+	"goalHavingTopicStallThresholdSeconds" : 120,
+	"aiPermissionWaitTimeoutSeconds" : 1800,
+	"aiPermissionTimeoutOption" : "reject_once",
+	"useDefaultMcpServers" : false,
+	"stallMonitoringIntervalSeconds" : 30,
+	"useStBuddySkillOnInitialPrompt" : true,
+	"exportApprovalWaitTimeoutSeconds" : 30,
+	"codingAgents" : [
+  	{
+  		"name" : "OpenCode",
+  		"command" : [
+  			"opencode",
+  			"acp"
+  		]
+  	},
+  	{
+			"name" : "claude-agent-acp",
+			"command" : [
+				"claude-agent-acp"
+			]
+		},
+		{
+			"name" : "Gemini CLI",
+			"command" : [
+				"gemini",
+				"--acp"
+			]
+		},
+		{
+			"name" : "Copilot CLI",
+			"command" : [
+				"copilot",
+				"--acp",
+				"--stdio"
+			]
+		},
+		{
+			"name" : "codex-acp",
+			"command" : [
+				"codex-acp"
+			]
+		},
+		{
+			"name" : "Cursor CLI",
+			"command" : [
+				"agent",
+				"acp"
+			]
+		},
+		{
+			"name" : "Kilo Code",
+			"command" : [
+				"kilo",
+				"acp"
+			]
+		},
+		{
+			"name" : "Kiro CLI",
+			"command" : [
+				"kiro-cli",
+				"acp"
+			]
+		},
+		{
+			"name" : "Devin CLI",
+			"command" : [
+				"devin",
+				"acp"
+			]
+		}
+	],
+	"goalSetCommand" : "/goal",
+	"useCommandOnGoalSet" : false,
+	"maxAttachmentSize" : 5242880,
+	"exportApprovalTimeoutOption" : "reject_once",
+	"watcherMessageThrottleSeconds" : 2
+}

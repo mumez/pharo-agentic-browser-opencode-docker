@@ -2,3 +2,5 @@
 screenshots/
 agentic-browser/*
 !agentic-browser/.gitkeep
+
+CLAUDE.local.md

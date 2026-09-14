@@ -2,10 +2,15 @@
 # Install smalltalk-dev-plugin for OpenCode (user scope + topic-template).
 # Topic-template gets skills/commands only — no MCP — so AgenticBrowser's
 # default MCP servers are not registered twice on ACP sessions.
+#
+# Custom AGENTS.md/CLAUDE.md (and any other file under seed/topic-template/)
+# are overlaid last, so editing seed/topic-template/ is enough to customize
+# the template without touching this script.
 set -euo pipefail
 
 PLUGIN="${1:-/opt/smalltalk-dev-plugin}"
 TEMPLATE="${2:-/opt/agentic-browser-seed/topic-template}"
+REPO_SEED_TEMPLATE="${3:-/opt/repo-seed/topic-template}"
 
 "${PLUGIN}/extra/setup-opencode.sh" -y --user
 
@@ -13,26 +18,6 @@ mkdir -p "${TEMPLATE}"
 "${PLUGIN}/extra/setup-opencode.sh" -y "${TEMPLATE}"
 rm -f "${TEMPLATE}/opencode.json" "${TEMPLATE}/opencode.json.bak"
 
-cat > "${TEMPLATE}/AGENTS.md" << 'EOF'
-## General Rules
-
-- Act based on facts. If you are unsure, state your assumptions.
-- Write the minimum code that solves the problem.
-
-## Implementation Rules
-
-- When editing `.st` files, actively consult the `smalltalk-developer` skill.
-  - In particular, the style guide section is important.
-- When debugging Smalltalk code, consult the `smalltalk-debugger` skill.
-  - In particular, focus on the troubleshooting and UI debugging sections.
-- Names matter. Always check that class/method/variable names are intentionally revealing. (Long names are fine)
-- Always keep the DRY principle to make the code simple and clean.
-- When adding a new feature, ensure it is covered by unit tests.
-
-## Key Gotchas
-
-- Timeout on import — Check your dependency order. Try `read_screen` for details (a Pharo debugger window has likely opened).
-- **No `eval` hack** for resolving imports: Tonel files should be safely imported via the `st-import` skill. Preparing package loading code yourself could be dangerous.
-EOF
-
-cp "${TEMPLATE}/AGENTS.md" "${TEMPLATE}/CLAUDE.md"
+if [ -d "${REPO_SEED_TEMPLATE}" ]; then
+  cp -a "${REPO_SEED_TEMPLATE}/." "${TEMPLATE}/"
+fi

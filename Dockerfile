@@ -38,10 +38,12 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/b
   ln -s /root/.opencode/bin/opencode /usr/local/bin/opencode; \
   fi
 
+COPY ./seed /opt/repo-seed
 COPY scripts/prepare-topic-template.sh /tmp/prepare-topic-template.sh
 RUN chmod +x /tmp/prepare-topic-template.sh \
-  && /tmp/prepare-topic-template.sh /opt/smalltalk-dev-plugin /opt/agentic-browser-seed/topic-template \
+  && /tmp/prepare-topic-template.sh /opt/smalltalk-dev-plugin /opt/agentic-browser-seed/topic-template /opt/repo-seed/topic-template \
   && rm /tmp/prepare-topic-template.sh \
+  && cp /opt/repo-seed/ab-settings.json /opt/agentic-browser-seed/ab-settings.json \
   && (timeout 90 uvx --from git+https://github.com/mumez/smalltalk-interop-mcp-server.git smalltalk-interop-mcp-server --help || true) \
   && (timeout 90 uvx --from git+https://github.com/mumez/smalltalk-validator-mcp-server.git@main smalltalk-validator-mcp-server --help || true)
 
@@ -52,7 +54,8 @@ RUN PHARO_MODE=headless setup.sh \
   && mkdir -p /root/screenshots \
   ${SMALLTALK_INTEROP_DIR}/agentic-browser \
   ${SMALLTALK_INTEROP_DIR}/assets \
-  && cp -a /opt/agentic-browser-seed/topic-template ${SMALLTALK_INTEROP_DIR}/agentic-browser/topic-template
+  && cp -a /opt/agentic-browser-seed/topic-template ${SMALLTALK_INTEROP_DIR}/agentic-browser/topic-template \
+  && cp /opt/agentic-browser-seed/ab-settings.json ${SMALLTALK_INTEROP_DIR}/agentic-browser/ab-settings.json
 
 COPY --from=webui /src/assets/agentic-browser ${SMALLTALK_INTEROP_DIR}/assets/agentic-browser
 COPY ./config/startup.st ${SMALLTALK_INTEROP_DIR}/config/startup.st
