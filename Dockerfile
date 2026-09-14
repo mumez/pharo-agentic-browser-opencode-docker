@@ -63,6 +63,15 @@ COPY ./scripts/seed-agentic-browser.sh /usr/local/bin/seed-agentic-browser.sh
 COPY ./scripts/ab-entrypoint.sh /usr/local/bin/ab-entrypoint.sh
 RUN chmod +x /usr/local/bin/seed-agentic-browser.sh /usr/local/bin/ab-entrypoint.sh
 
+# Allow the container to run as an arbitrary non-root UID/GID (see run.sh
+# --user / compose.yaml's HOST_UID/HOST_GID): everything under /root is
+# root-owned from the build, and /run, /var/log/supervisor default to
+# root:root, so any other UID needs explicit rwX to read/write its own
+# home, Pharo image, OpenCode state, and supervisord's pid/socket/logs.
+RUN chmod -R a+rwX /root \
+  && chmod a+rwX /run /var/log/supervisor
+
+ENV HOME=/root
 ENV PHARO_HOME=${SMALLTALK_INTEROP_DIR}
 ENV PHARO_SIS_PORT=8086
 ENV PHARO_SIS_SCREENSHOT_DIR=/root/screenshots

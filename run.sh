@@ -6,6 +6,7 @@ docker rm -f pharo-ab-opencode01 2>/dev/null || true
 
 DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}" docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
 docker run --name pharo-ab-opencode01 -d \
+    --user "$(id -u):$(id -g)" \
     -p 5900:5900 \
     -p 6901:6901 \
     -p 8080:8080 \

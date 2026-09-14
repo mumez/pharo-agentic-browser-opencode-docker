@@ -30,6 +30,8 @@ docker compose up -d --build
 
 Give it a few minutes on first boot (Pharo GUI + Web UI need to come up).
 
+`run.sh` always runs the container as the invoking host user, so files it creates under `./agentic-browser` and `./screenshots` are owned by you, not root. With Docker Compose this is opt-in: set `HOST_UID`/`HOST_GID` in `.env` (via `id -u` / `id -g`) — left unset, it runs as root as before.
+
 ## Host-side directories
 
 | Path | What it's for |

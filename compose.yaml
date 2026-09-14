@@ -3,6 +3,7 @@ services:
     build: .
     image: pharo-agentic-browser-opencode-docker-sis-pharo
     container_name: pharo-ab-opencode01
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
     ports:
       - "5900:5900"
       - "6901:6901"
