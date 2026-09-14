@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p "$PWD/screenshots" "$PWD/repos" "$PWD/agentic-browser"
+mkdir -p "$PWD/screenshots" "$PWD/agentic-browser"
 
 docker rm -f sis-pharo01 2>/dev/null || true
 
