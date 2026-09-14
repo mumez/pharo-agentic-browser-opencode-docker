@@ -53,15 +53,17 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 
 - **VNC into the Pharo screen** to use AgenticBrowser's native UI, which supports operations the Web UI doesn't expose (Settings, target packages, System Browser drag-and-drop, the debugger, etc.):
   - http://localhost:6901/?password=vncpassword
-- **`docker exec -it` into the OpenCode terminal** directly, for a TUI session in a topic's working directory:
+- **`./opencode-cli.sh`** opens the OpenCode TUI directly in the container, in a topic's working directory:
   ```bash
-  docker exec -it sis-pharo01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode'
+  ./opencode-cli.sh
   ```
-- **`docker exec -it` to run OpenCode's own Web UI** (`opencode web`) instead of the TUI — a separate server from AgenticBrowser's ACP sessions, useful for standalone OpenCode work against the Interop MCP:
+- **`./opencode-web.sh`** runs OpenCode's own Web UI (`opencode web`) instead of the TUI — a separate server from AgenticBrowser's ACP sessions, useful for standalone OpenCode work against the Interop MCP:
   ```bash
-  docker exec -it sis-pharo01 bash -lc 'opencode web --hostname 0.0.0.0 --port 4096'
+  ./opencode-web.sh
   ```
   Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`) before exposing it.
+
+  Both are thin wrappers around `docker exec -it sis-pharo01 ...` — use that directly if you're not running against the default container name.
 
 ## Security notes
 
