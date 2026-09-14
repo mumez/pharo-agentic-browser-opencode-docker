@@ -1,0 +1,24 @@
+services:
+  sis-pharo:
+    build: .
+    image: pharo-agentic-browser-opencode-docker-sis-pharo
+    container_name: sis-pharo01
+    ports:
+      - "5900:5900"
+      - "6901:6901"
+      - "8080:8080"
+      - "8086:8086"
+      # Optional OpenCode web UI (start it yourself; set OPENCODE_SERVER_PASSWORD):
+      # - "4096:4096"
+    environment:
+      PHARO_SIS_PORT: "8086"
+      PHARO_RIPPLE_PORT: "8080"
+      PHARO_RIPPLE_BIND_ADDRESS: "0.0.0.0"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
+      OPENCODE_SERVER_PASSWORD: ${OPENCODE_SERVER_PASSWORD:-}
+    volumes:
+      - ./screenshots:/root/screenshots
+      - ./agentic-browser:/root/smalltalk-interop/agentic-browser

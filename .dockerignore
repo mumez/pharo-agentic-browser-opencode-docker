@@ -1,0 +1,9 @@
+.git
+.claude
+.env
+.env.example
+docs
+screenshots
+repos
+agentic-browser
+README.md
