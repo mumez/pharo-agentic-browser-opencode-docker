@@ -33,8 +33,8 @@ DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-phar
 docker compose up -d --no-build
 
 # Exec into the running container
-docker exec -it sis-pharo01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode'
-docker exec -it sis-pharo01 opencode run "Smalltalk version"
+docker exec -it pharo-ab-opencode01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode'
+docker exec -it pharo-ab-opencode01 opencode run "Smalltalk version"
 ```
 
 There is no lint/test suite in this repo; "verification" means rebuilding the image and confirming the container boots and the three ports respond (8080 Web UI, 6901 noVNC, 8086 Interop Server).

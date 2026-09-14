@@ -63,7 +63,7 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
   ```
   Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`) before exposing it.
 
-  Both are thin wrappers around `docker exec -it sis-pharo01 ...` — use that directly if you're not running against the default container name.
+  Both are thin wrappers around `docker exec -it pharo-ab-opencode01 ...` — use that directly if you're not running against the default container name.
 
 ## Security notes
 

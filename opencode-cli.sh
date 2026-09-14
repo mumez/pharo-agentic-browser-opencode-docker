@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker exec -it sis-pharo01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode "$@"' -- "$@"
+docker exec -it pharo-ab-opencode01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode "$@"' -- "$@"

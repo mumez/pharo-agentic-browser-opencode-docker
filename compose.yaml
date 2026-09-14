@@ -2,7 +2,7 @@ services:
   sis-pharo:
     build: .
     image: pharo-agentic-browser-opencode-docker-sis-pharo
-    container_name: sis-pharo01
+    container_name: pharo-ab-opencode01
     ports:
       - "5900:5900"
       - "6901:6901"
