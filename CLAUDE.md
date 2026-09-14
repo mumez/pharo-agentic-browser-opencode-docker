@@ -25,7 +25,7 @@ Pharo starts `opencode acp` as a *child process* over ACP (Agent Client Protocol
 cp .env.example .env      # fill in ANTHROPIC_API_KEY etc.
 docker compose up -d --build
 
-# Build and run via run.sh (equivalent, plain `docker run`, mounts ./repos too)
+# Build and run via run.sh (equivalent, plain `docker run`, mounts ./agentic-browser too)
 ./run.sh
 
 # If BuildKit fails with "driver not connecting" (Docker Desktop):

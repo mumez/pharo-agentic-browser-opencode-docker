@@ -19,6 +19,5 @@ docker run --name sis-pharo01 -d \
     -e GOOGLE_GENERATIVE_AI_API_KEY="${GOOGLE_GENERATIVE_AI_API_KEY:-}" \
     -e OPENCODE_SERVER_PASSWORD="${OPENCODE_SERVER_PASSWORD:-}" \
     -v "$PWD/screenshots:/root/screenshots" \
-    -v "$PWD/repos:/root/repos" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
     pharo-agentic-browser-opencode-docker-sis-pharo
