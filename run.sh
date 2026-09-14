@@ -4,7 +4,7 @@ mkdir -p "$PWD/screenshots" "$PWD/agentic-browser"
 
 docker rm -f pharo-ab-opencode01 2>/dev/null || true
 
-DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}" docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
+docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
 docker run --name pharo-ab-opencode01 -d \
     --user "$(id -u):$(id -g)" \
     -p 5900:5900 \
@@ -19,6 +19,7 @@ docker run --name pharo-ab-opencode01 -d \
     -e OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-}" \
     -e GOOGLE_GENERATIVE_AI_API_KEY="${GOOGLE_GENERATIVE_AI_API_KEY:-}" \
     -e OPENCODE_SERVER_PASSWORD="${OPENCODE_SERVER_PASSWORD:-}" \
+    -e OPENCODE_CONFIG="${OPENCODE_CONFIG:-}" \
     -v "$PWD/screenshots:/root/screenshots" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
     pharo-agentic-browser-opencode-docker-sis-pharo

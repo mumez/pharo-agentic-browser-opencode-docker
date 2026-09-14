@@ -75,7 +75,7 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 
 ## Customizing OpenCode (`opencode.json`)
 
-To change the default model, add MCP servers, or add/configure providers for topics started via AgenticBrowser, place your own `opencode.json` at `seed/topic-template/opencode.json` (create the file if it doesn't exist) and rebuild the image. Files under `seed/topic-template/` are copied on top of the generated template last, so this file always wins.
+To change the default model, add MCP servers, or add/configure providers for topics started via AgenticBrowser, you can customize `opencode.json`. Common changes:
 
 ```json
 {
@@ -90,7 +90,15 @@ To change the default model, add MCP servers, or add/configure providers for top
 - **Add a provider**: add an entry under `provider` (e.g. custom base URL, extra models). Never put API keys here — see [Security notes](#security-notes); keys still flow only through `.env`.
 - **Add MCP servers**: add entries under `mcp`.
 
-After editing, rebuild (`docker compose up -d --build`) so the change is baked into a fresh image. If `./agentic-browser/topic-template/` already exists on the host from a previous run, it won't be overwritten automatically — either delete it (it will be reseeded from the image) or edit `./agentic-browser/topic-template/opencode.json` directly for an existing container.
+There are a few ways to apply it, from most to least permanent:
+
+1. **Baked into the image**: place the file at `seed/topic-template/opencode.json` (create it if it doesn't exist) and rebuild (`docker compose up -d --build`). Files under `seed/topic-template/` are copied on top of the generated template last, so this always wins. This is the way to go if you want the customization to survive rebuilds and be the default for new checkouts.
+2. **Directly on the host, no rebuild**: if `./agentic-browser/topic-template/` already exists (created on first boot), just edit `./agentic-browser/topic-template/opencode.json` there directly — it's bind-mounted, so the container sees the change immediately for new topics. Quick to iterate with, but local to your checkout and not tracked in this repo.
+3. **`OPENCODE_CONFIG` env var**: point OpenCode at a config file without touching `topic-template/` at all. The path is resolved inside the container, so put the file under `./agentic-browser` (already bind-mounted) and reference its container-side path:
+   ```bash
+   OPENCODE_CONFIG=/root/smalltalk-interop/agentic-browser/opencode.json
+   ```
+   With Docker Compose, set it in `.env` and restart (`docker compose up -d`). With `run.sh`, export it in your shell before running (`run.sh` reads env vars directly, not `.env`). Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
 
 ## Other settings
 
