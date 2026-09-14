@@ -73,6 +73,25 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 - The AgenticBrowser Web UI (`:8080`) has **no authentication**. It's meant for LAN/localhost use only — do not expose it to the internet.
 - Don't publish OpenCode's own web server (`:4096`) without setting `OPENCODE_SERVER_PASSWORD` first.
 
+## Customizing OpenCode (`opencode.json`)
+
+To change the default model, add MCP servers, or add/configure providers for topics started via AgenticBrowser, place your own `opencode.json` at `seed/topic-template/opencode.json` (create the file if it doesn't exist) and rebuild the image. Files under `seed/topic-template/` are copied on top of the generated template last, so this file always wins.
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {},
+  "model": "anthropic/claude-sonnet-5",
+  "small_model": "anthropic/claude-haiku-4-5"
+}
+```
+
+- **Default model**: set `model` / `small_model` (`provider/model-id`).
+- **Add a provider**: add an entry under `provider` (e.g. custom base URL, extra models). Never put API keys here — see [Security notes](#security-notes); keys still flow only through `.env`.
+- **Add MCP servers**: add entries under `mcp`.
+
+After editing, rebuild (`docker compose up -d --build`) so the change is baked into a fresh image. If `./agentic-browser/topic-template/` already exists on the host from a previous run, it won't be overwritten automatically — either delete it (it will be reseeded from the image) or edit `./agentic-browser/topic-template/opencode.json` directly for an existing container.
+
 ## Other settings
 
 - Environment variables, volumes, MCP wiring, and build details are documented in [CLAUDE.md](CLAUDE.md).
