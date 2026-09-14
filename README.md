@@ -1,124 +1,80 @@
 # pharo-agentic-browser-opencode-docker
 
-Pharo + [AgenticBrowser](https://github.com/mumez/pharo-agentic-browser) (Web UI) + [OpenCode](https://opencode.ai/) + [smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin) in one container.
+An all-in-one development container for AI-assisted Smalltalk development.
 
-This is a **container-side** Smalltalk AI coding environment: Pharo starts `opencode acp` as a child process over ACP. It is not a host-AI sandbox (that remains [smalltalk-interop-docker](https://github.com/mumez/smalltalk-interop-docker)).
+As long as Docker is installed, you can start developing right away. The container packages:
 
-```
-Host browser  →  AgenticBrowser Web UI :8080  →  Pharo
-Host noVNC    →  Spec2 UI :6901               →  Pharo
-docker exec   →  OpenCode TUI
-Pharo         →  opencode acp (stdio)         →  smalltalk-dev-plugin
-plugin / MCP  →  SisServer :8086              →  Pharo
-```
+- **Pharo** ([AgenticBrowser](https://github.com/mumez/pharo-agentic-browser) + SmalltalkInteropServer)
+- **OpenCode** ([smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin))
 
-## Quick start
+The only thing you need to bring is your coding agent's credentials (e.g. an Anthropic API key).
+
+## Setup
 
 ```bash
 cp .env.example .env
-# Put provider keys in .env (ANTHROPIC_API_KEY, OPENAI_API_KEY, …)
+# Fill in ANTHROPIC_API_KEY (and/or other provider keys) in .env
+```
 
+Then start the container either with `run.sh`:
+
+```bash
+./run.sh
+```
+
+or with Docker Compose:
+
+```bash
 docker compose up -d --build
 ```
 
-Then open:
+Give it a few minutes on first boot (Pharo GUI + Web UI need to come up).
 
-- **AgenticBrowser Web UI (primary):** http://localhost:8080/assets/agentic-browser/
-- **Pharo noVNC (secondary):** http://localhost:6901/?password=vncpassword
-- **Interop Server:** http://localhost:8086
+## Host-side directories
 
-Give the image several minutes on first boot (Pharo GUI + Web UI). WSL2 Docker memory should be comfortable (4 GiB+).
+| Path | What it's for |
+| --- | --- |
+| `./agentic-browser` | Where your source repositories live. AgenticBrowser topics work inside this tree, and it's where you clone/place the project(s) you want to develop. |
+| `./screenshots` | Where screenshots taken from Pharo/AgenticBrowser are saved. |
 
-## API keys
+The first time you start the container, a `topic-template` directory is created under `./agentic-browser` if it doesn't already exist. It holds the configuration that lets OpenCode use `smalltalk-dev-plugin` (skills/commands) inside each topic.
 
-Do **not** put secrets in `opencode.json` and mount that file.
+## Usage
 
-1. Copy `.env.example` to `.env` (gitignored). Compose interpolates it into container env.
-2. OpenCode reads `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / etc. from the environment.
-3. Optional, non-secret config only: mount `~/.config/opencode/opencode.json` and use `{env:ANTHROPIC_API_KEY}` references if you need extra settings.
-4. Optional auth store from a host `opencode auth login`: `~/.local/share/opencode/auth.json` → `/root/.local/share/opencode/auth.json`.
+### Basic
 
-Never bake keys into the image. Do not publish port 4096 without `OPENCODE_SERVER_PASSWORD`.
+Open the **AgenticBrowser Web UI** in your host browser:
 
-## How to operate AgenticBrowser
+- http://localhost:8080/assets/agentic-browser/
 
-**Web UI is the main UI.** Create a topic, pick OpenCode, chat.
+Create a topic, pick OpenCode as the agent, and start chatting. This covers most day-to-day development.
 
-Web UI can pick Auto / existing / new working directories **under** `<PHARO_HOME>/agentic-browser`. It cannot point at an arbitrary path outside that tree. For a project cloned outside `agentic-browser/`, set the working directory once from Spec2 (noVNC) or the Playground.
+### Advanced
 
-VNC is still useful for Settings, target packages, System Browser drag-and-drop, `[ ]` screenshots, and the debugger.
+- **VNC into the Pharo screen** to use AgenticBrowser's native UI, which supports operations the Web UI doesn't expose (Settings, target packages, System Browser drag-and-drop, the debugger, etc.):
+  - http://localhost:6901/?password=vncpassword
+- **`docker exec -it` into the OpenCode terminal** directly, for a TUI session in a topic's working directory:
+  ```bash
+  docker exec -it sis-pharo01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode'
+  ```
+- **`docker exec -it` to run OpenCode's own Web UI** (`opencode web`) instead of the TUI — a separate server from AgenticBrowser's ACP sessions, useful for standalone OpenCode work against the Interop MCP:
+  ```bash
+  docker exec -it sis-pharo01 bash -lc 'opencode web --hostname 0.0.0.0 --port 4096'
+  ```
+  Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`) before exposing it.
 
-The Web UI has **no auth** (LAN / localhost). Do not expose `:8080` to the internet.
+## Security notes
 
-## OpenCode CLI
+- Never put API keys in `opencode.json` or bake them into the image. Keys only flow through `.env` (gitignored) → container environment → OpenCode reads them directly.
+- The AgenticBrowser Web UI (`:8080`) has **no authentication**. It's meant for LAN/localhost use only — do not expose it to the internet.
+- Don't publish OpenCode's own web server (`:4096`) without setting `OPENCODE_SERVER_PASSWORD` first.
 
-The main agent path is **not** `opencode web`. AgenticBrowser spawns `opencode acp` per topic on stdio. `opencode web` is a different server and does not share those ACP sessions.
+## Other settings
 
-```bash
-# TUI in a topic working directory
-docker exec -it sis-pharo01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && ls && opencode'
-
-# One-shot
-docker exec -it sis-pharo01 opencode run "Smalltalk version"
-```
-
-Optional standalone OpenCode web (Interop MCP, not AgenticBrowser):
-
-```bash
-docker exec -it sis-pharo01 bash -lc 'opencode web --hostname 0.0.0.0 --port 4096'
-```
-
-Set `OPENCODE_SERVER_PASSWORD` and uncomment `4096:4096` in `compose.yaml` first. `opencode attach` only works with `web`/`serve`, not ACP.
-
-## Tonel / working directories
-
-OpenCode and Pharo share the container filesystem. No extra mount is required between them.
-
-| Path                                      | Role                                                                                                                                        |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/root/smalltalk-interop/agentic-browser` | Topic cwd (`<title>-<uuid>/`), `topic-template`, `ab-topics.fuel`, `ab-settings.json`, source repos. Bind-mounted from `./agentic-browser`. |
-| `/root/screenshots`                       | Interop + AgenticBrowser screenshots.                                                                                                       |
-
-The entrypoint copies image `topic-template` into the bind-mount if it is missing or empty, so a fresh `./agentic-browser` does not hide the baked template.
-
-MCP for ACP topics comes from AgenticBrowser defaults (`smalltalk-interop` + `smalltalk-validator`, `SIS_PORT=8086`). The topic-template ships plugin **skills/commands** only (no `opencode.json` MCP) to avoid double registration. User-scope OpenCode config still has MCP so `docker exec opencode` can talk to Pharo. If an ACP session shows the same MCP server twice, turn off **Use default MCP servers** in AgenticBrowser Settings (VNC).
-
-## Environment variables
-
-| Variable                                      | Description                                     | Default             |
-| --------------------------------------------- | ----------------------------------------------- | ------------------- |
-| `PHARO_SIS_PORT`                              | Interop Server port                             | `8086`              |
-| `PHARO_SIS_SCREENSHOT_DIR`                    | Screenshot directory                            | `/root/screenshots` |
-| `PHARO_RIPPLE_PORT`                           | AgenticBrowser Web UI / Ripple port             | `8080`              |
-| `PHARO_RIPPLE_BIND_ADDRESS`                   | Ripple bind address                             | `0.0.0.0`           |
-| `ANTHROPIC_API_KEY` (and other provider keys) | Passed through to OpenCode                      | (empty)             |
-| `OPENCODE_SERVER_PASSWORD`                    | Required if you run `opencode web` on `0.0.0.0` | (empty)             |
-
-VNC settings: [ubuntu-vnc-supervisor](https://github.com/mumez/ubuntu-vnc-supervisor). Pharo image settings: [pharo-vnc-supervisor](https://github.com/mumez/pharo-vnc-supervisor).
-
-## Volumes
-
-| Path                                      | Description                                                                                                                                                                        |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/root/smalltalk-interop`                 | Pharo home (image, config, assets). Not a named volume, so image rebuilds take effect. Bind the whole tree only if you need to persist `.image` (heavy; not recommended at first). |
-| `/root/smalltalk-interop/agentic-browser` | Topics + template (compose bind-mounts `./agentic-browser`)                                                                                                                        |
-| `/root/screenshots`                       | Screenshots                                                                                                                                                                        |
-
-## Build notes
-
-The image:
-
-- loads Interop Server, then AgenticBrowser group `all`
-- copies Web UI assets from [pharo-agentic-browser-web-ui](https://github.com/mumez/pharo-agentic-browser-web-ui)
-- installs OpenCode, `uv`/`uvx`, git
-- runs `setup-opencode.sh --user` and seeds `topic-template`
-- pre-caches the Smalltalk MCP servers via `uvx`
-
-If `docker compose build` fails with `driver not connecting` (Docker Desktop / BuildKit), use the legacy builder:
-
-```bash
-DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
-docker compose up -d --no-build
-```
-
-Startup order: SisServer, then `AgenticBrowser startWebUI`. OpenCode itself is not a daemon; ACP sessions spawn it.
+- Environment variables, volumes, MCP wiring, and build details are documented in [CLAUDE.md](CLAUDE.md).
+- VNC settings: [ubuntu-vnc-supervisor](https://github.com/mumez/ubuntu-vnc-supervisor). Pharo image settings: [pharo-vnc-supervisor](https://github.com/mumez/pharo-vnc-supervisor).
+- If `docker compose build` fails with `driver not connecting` (Docker Desktop / BuildKit), fall back to the legacy builder:
+  ```bash
+  DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
+  docker compose up -d --no-build
+  ```
