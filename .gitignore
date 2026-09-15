@@ -1,5 +1,6 @@
 .env
-screenshots/
+screenshots/*
+!screenshots/.gitkeep
 agentic-browser/*
 !agentic-browser/.gitkeep
 opencode-data/*

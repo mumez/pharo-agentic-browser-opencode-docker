@@ -81,7 +81,7 @@ ENV PHARO_SIS_SCREENSHOT_DIR=/root/screenshots
 ENV PHARO_START_SCRIPT=${SMALLTALK_INTEROP_DIR}/config/startup.st
 ENV PHARO_RIPPLE_ASSETS_DIR=${SMALLTALK_INTEROP_DIR}/assets
 
-VOLUME ["${PHARO_SIS_SCREENSHOT_DIR}", "${SMALLTALK_INTEROP_DIR}/agentic-browser"]
+VOLUME ["${PHARO_SIS_SCREENSHOT_DIR}", "${SMALLTALK_INTEROP_DIR}/agentic-browser", "/root/.local/share/opencode"]
 EXPOSE 8080 8086
 
 ENTRYPOINT ["/usr/local/bin/ab-entrypoint.sh"]
