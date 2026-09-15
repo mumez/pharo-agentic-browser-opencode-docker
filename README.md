@@ -100,6 +100,21 @@ There are a few ways to apply it, from most to least permanent:
    ```
    With Docker Compose, set it in `.env` and restart (`docker compose up -d`). With `run.sh`, export it in your shell before running (`run.sh` reads env vars directly, not `.env`). Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
 
+## Relation to smalltalk-interop-docker
+
+[smalltalk-interop-docker](https://github.com/mumez/smalltalk-interop-docker) is a lighter, related project that this repo builds on conceptually but not directly:
+
+| | This repo | smalltalk-interop-docker |
+| --- | --- | --- |
+| What's inside the container | Pharo + AgenticBrowser (Web UI) + OpenCode + smalltalk-dev-plugin | Pharo + PharoSmalltalkInteropServer only |
+| Where the coding agent runs | Inside the container　(OpenCode) | Outside the container, on the host (Claude Code, OpenCode, etc.) |
+| How you interact | AgenticBrowser Web UI (`:8080`) or VNC (`:6901`), no host agent needed | Your own host-side coding agent + [smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin), or AgenticBrowser on your host |
+| Project source location | Must live under the bind-mounted `./agentic-browser` (AgenticBrowser topics can't point elsewhere) | Any host directory you mount to `/root/repos` |
+
+Pick **this repo** if you want a self-contained, all-in-one box where the AI agent runs alongside Pharo and you drive everything through the Web UI or VNC without installing anything else on the host.
+
+Pick **smalltalk-interop-docker** if you already have a coding agent on your host (Claude Code, AgenticBrowser, etc.) and just want an isolated, disposable Pharo sandbox it can talk to over MCP.
+
 ## Other settings
 
 - Environment variables, volumes, MCP wiring, and build details are documented in [CLAUDE.md](CLAUDE.md).
@@ -109,3 +124,7 @@ There are a few ways to apply it, from most to least permanent:
   DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
   docker compose up -d --no-build
   ```
+
+## License
+
+MIT
