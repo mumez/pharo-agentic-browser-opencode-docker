@@ -3,6 +3,4 @@ set -euo pipefail
 
 IMAGE="${IMAGE:-pharo-agentic-browser-opencode-docker}"
 
-docker build -t "$IMAGE" .
-
 IMAGE="$IMAGE" exec "$(dirname "$0")/run.sh"

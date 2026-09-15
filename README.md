@@ -11,9 +11,11 @@ The only thing you need to bring is your coding agent's credentials (e.g. an Ant
 
 ## Setup
 
-### Option A: Pull from GHCR (recommended)
+### Option A: Pull the pre-built docker image from GHCR
 
-No need to build the image yourself — `run.sh` just does a `docker run` and defaults to the GHCR image, so it works whether or not you've ever built locally. It also auto-loads `.env` from the current directory if present:
+> Note: the pre-built image is for AMD64. If you are using Apple Silicon (Mac ARM64), please follow Option B.
+
+Please edit `.env` first and execute `run.sh`, which automatically load `.env`:
 
 ```bash
 cp .env.example .env
@@ -21,7 +23,7 @@ cp .env.example .env
 ./run.sh
 ```
 
-or with Docker Compose (`compose.yaml` also defaults to the GHCR image):
+or with Docker Compose:
 
 ```bash
 docker compose up -d
@@ -44,7 +46,8 @@ Add other provider keys (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERAT
 
 ### Option B: Build locally
 
-If you're modifying the Dockerfile, seed files, or plugin/webui refs, build the image yourself with `build_run.sh` (builds, then delegates to `run.sh`, which auto-loads `.env`):
+You can also build the image yourself with `build_run.sh` (builds, then delegates to `run.sh`, which auto-loads `.env`).
+Good for modifying the Dockerfile, seed files, or plugin/webui refs:
 
 ```bash
 cp .env.example .env
@@ -61,6 +64,8 @@ docker compose -f compose.yaml -f compose.build.yaml up -d --build
 Give it a few minutes on first boot (Pharo GUI + Web UI need to come up).
 
 `run.sh` always runs the container as the invoking host user, so files it creates under `./agentic-browser` and `./screenshots` are owned by you, not root. With Docker Compose this is opt-in: set `HOST_UID`/`HOST_GID` in `.env` (via `id -u` / `id -g`) — left unset, it runs as root as before.
+
+Once you've built the image, you can use `./run_local.sh` to start the container without rebuilding.
 
 ## Host-side directories
 
@@ -151,7 +156,7 @@ Pick **smalltalk-interop-docker** if you already have a coding agent on your hos
 - VNC settings: [ubuntu-vnc-supervisor](https://github.com/mumez/ubuntu-vnc-supervisor). Pharo image settings: [pharo-vnc-supervisor](https://github.com/mumez/pharo-vnc-supervisor).
 - If `docker compose build` fails with `driver not connecting` (Docker Desktop / BuildKit), fall back to the legacy builder:
   ```bash
-  DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
+  DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker .
   docker compose up -d --no-build
   ```
 
