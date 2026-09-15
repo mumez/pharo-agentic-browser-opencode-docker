@@ -61,7 +61,10 @@ COPY --from=webui /src/assets/agentic-browser ${SMALLTALK_INTEROP_DIR}/assets/ag
 COPY ./config/startup.st ${SMALLTALK_INTEROP_DIR}/config/startup.st
 COPY ./scripts/seed-agentic-browser.sh /usr/local/bin/seed-agentic-browser.sh
 COPY ./scripts/ab-entrypoint.sh /usr/local/bin/ab-entrypoint.sh
-RUN chmod +x /usr/local/bin/seed-agentic-browser.sh /usr/local/bin/ab-entrypoint.sh
+COPY ./scripts/opencode-cli.sh /usr/local/bin/opencode-cli
+COPY ./scripts/opencode-web.sh /usr/local/bin/opencode-web
+RUN chmod +x /usr/local/bin/seed-agentic-browser.sh /usr/local/bin/ab-entrypoint.sh \
+  /usr/local/bin/opencode-cli /usr/local/bin/opencode-web
 
 # Allow the container to run as an arbitrary non-root UID/GID (see run.sh
 # --user / compose.yaml's HOST_UID/HOST_GID): everything under /root is

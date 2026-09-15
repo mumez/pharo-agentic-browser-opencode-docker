@@ -11,15 +11,39 @@ The only thing you need to bring is your coding agent's credentials (e.g. an Ant
 
 ## Setup
 
+### Option A: Pull from GHCR (recommended)
+
+No need to build the image yourself — `run.sh` just does a `docker run` and defaults to the GHCR image, so it works whether or not you've ever built locally. It also auto-loads `.env` from the current directory if present:
+
 ```bash
 cp .env.example .env
 # Fill in ANTHROPIC_API_KEY (and/or other provider keys) in .env
+./run.sh
 ```
 
-Then start the container either with `run.sh`:
+Or, without cloning this repo at all, pull and run it directly:
 
 ```bash
-./run.sh
+mkdir -p agentic-browser screenshots
+docker pull ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
+docker run --name pharo-ab-opencode01 -d \
+    -p 6901:6901 -p 8080:8080 -p 8086:8086 \
+    -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" \
+    -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
+    -v "$PWD/screenshots:/root/screenshots" \
+    ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
+```
+
+Add other provider keys (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`) or `-u "$(id -u):$(id -g)"` (to keep created files host-owned) as needed — see the env vars documented in `.env.example` if you clone the repo for reference.
+
+### Option B: Build locally
+
+If you're modifying the Dockerfile, seed files, or plugin/webui refs, build the image yourself with `build_run.sh` (builds, then delegates to `run.sh`, which auto-loads `.env`):
+
+```bash
+cp .env.example .env
+# Fill in ANTHROPIC_API_KEY (and/or other provider keys) in .env
+./build_run.sh
 ```
 
 or with Docker Compose:
@@ -55,17 +79,17 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 
 - **VNC into the Pharo screen** to use AgenticBrowser's native UI, which supports operations the Web UI doesn't expose (Settings, target packages, System Browser drag-and-drop, the debugger, etc.):
   - http://localhost:6901/?password=vncpassword
-- **`./opencode-cli.sh`** opens the OpenCode TUI directly in the container, in a topic's working directory:
+- **`opencode-cli`** opens the OpenCode TUI directly in the container, in the `agentic-browser` working directory. It's baked into the image, so it works whether you built locally or pulled from GHCR — no repo clone needed:
   ```bash
-  ./opencode-cli.sh
+  docker exec -it pharo-ab-opencode01 opencode-cli
   ```
-- **`./opencode-web.sh`** runs OpenCode's own Web UI (`opencode web`) instead of the TUI — a separate server from AgenticBrowser's ACP sessions, useful for standalone OpenCode work against the Interop MCP:
+- **`opencode-web`** runs OpenCode's own Web UI (`opencode web`) instead of the TUI — a separate server from AgenticBrowser's ACP sessions, useful for standalone OpenCode work against the Interop MCP:
   ```bash
-  ./opencode-web.sh
+  docker exec -it pharo-ab-opencode01 opencode-web
   ```
-  Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`) before exposing it.
+  Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`, or add `-p 4096:4096` to the `docker run` above) before exposing it.
 
-  Both are thin wrappers around `docker exec -it pharo-ab-opencode01 ...` — use that directly if you're not running against the default container name.
+  Replace `pharo-ab-opencode01` with your container's name if you're not running against the default.
 
 ## Security notes
 
@@ -98,7 +122,7 @@ There are a few ways to apply it, from most to least permanent:
    ```bash
    OPENCODE_CONFIG=/root/smalltalk-interop/agentic-browser/opencode.json
    ```
-   With Docker Compose, set it in `.env` and restart (`docker compose up -d`). With `run.sh`, export it in your shell before running (`run.sh` reads env vars directly, not `.env`). Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
+   With Docker Compose or `run.sh`, set it in `.env` and restart (`docker compose up -d` / `./run.sh`) — both auto-load `.env`. Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
 
 ## Relation to smalltalk-interop-docker
 

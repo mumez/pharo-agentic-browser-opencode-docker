@@ -1,11 +1,20 @@
 #!/bin/bash
+set -euo pipefail
+
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+fi
+
+IMAGE="${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}"
+CONTAINER_NAME="${CONTAINER_NAME:-pharo-ab-opencode01}"
 
 mkdir -p "$PWD/screenshots" "$PWD/agentic-browser"
 
-docker rm -f pharo-ab-opencode01 2>/dev/null || true
+docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
-docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
-docker run --name pharo-ab-opencode01 -d \
+docker run --name "$CONTAINER_NAME" -d \
     --user "$(id -u):$(id -g)" \
     -p 5900:5900 \
     -p 6901:6901 \
@@ -22,4 +31,4 @@ docker run --name pharo-ab-opencode01 -d \
     -e OPENCODE_CONFIG="${OPENCODE_CONFIG:-}" \
     -v "$PWD/screenshots:/root/screenshots" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
-    pharo-agentic-browser-opencode-docker-sis-pharo
+    "$IMAGE"
