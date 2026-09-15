@@ -1,7 +1,6 @@
 services:
-  sis-pharo:
-    build: .
-    image: pharo-agentic-browser-opencode-docker-sis-pharo
+  pharo-agentic-browser-opencode:
+    image: ${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}
     container_name: pharo-ab-opencode01
     user: "${HOST_UID:-0}:${HOST_GID:-0}"
     ports:

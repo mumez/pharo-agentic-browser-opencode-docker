@@ -21,9 +21,13 @@ Pharo starts `opencode acp` as a *child process* over ACP (Agent Client Protocol
 ## Common commands
 
 ```bash
-# Build and run via compose (preferred)
+# Pull-based compose (preferred; compose.yaml defaults `image:` to the GHCR tag, no build)
 cp .env.example .env      # fill in ANTHROPIC_API_KEY etc.
-docker compose up -d --build
+docker compose up -d
+
+# Build-based compose: layer compose.build.yaml on top to add `build:` and
+# switch to the local image tag
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
 
 # Build and run via build_run.sh (builds the local image, then delegates to run.sh)
 ./build_run.sh
@@ -35,7 +39,7 @@ docker compose up -d --build
 
 # If BuildKit fails with "driver not connecting" (Docker Desktop):
 DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker-sis-pharo .
-docker compose up -d --no-build
+docker compose -f compose.yaml -f compose.build.yaml up -d --no-build
 
 # Exec into the running container
 docker exec -it pharo-ab-opencode01 bash -lc 'cd /root/smalltalk-interop/agentic-browser && opencode'

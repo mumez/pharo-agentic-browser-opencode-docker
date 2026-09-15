@@ -21,6 +21,12 @@ cp .env.example .env
 ./run.sh
 ```
 
+or with Docker Compose (`compose.yaml` also defaults to the GHCR image):
+
+```bash
+docker compose up -d
+```
+
 Or, without cloning this repo at all, pull and run it directly:
 
 ```bash
@@ -46,10 +52,10 @@ cp .env.example .env
 ./build_run.sh
 ```
 
-or with Docker Compose:
+or with Docker Compose, layer `compose.build.yaml` on top of the base `compose.yaml` to add the `build:` step and switch to the local image tag:
 
 ```bash
-docker compose up -d --build
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
 ```
 
 Give it a few minutes on first boot (Pharo GUI + Web UI need to come up).

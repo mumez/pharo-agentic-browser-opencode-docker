@@ -1,0 +1,4 @@
+services:
+  pharo-agentic-browser-opencode:
+    build: .
+    image: pharo-agentic-browser-opencode-docker-sis-pharo
