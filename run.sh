@@ -10,7 +10,7 @@ fi
 IMAGE="${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}"
 CONTAINER_NAME="${CONTAINER_NAME:-pharo-ab-opencode01}"
 
-mkdir -p "$PWD/screenshots" "$PWD/agentic-browser"
+mkdir -p "$PWD/screenshots" "$PWD/agentic-browser" "$PWD/opencode-data"
 
 docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
@@ -32,4 +32,5 @@ docker run --name "$CONTAINER_NAME" -d \
     -e OPENCODE_CONFIG="${OPENCODE_CONFIG:-}" \
     -v "$PWD/screenshots:/root/screenshots" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
+    -v "$PWD/opencode-data:/root/.local/share/opencode" \
     "$IMAGE"

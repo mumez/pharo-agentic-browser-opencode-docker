@@ -2,5 +2,7 @@
 screenshots/
 agentic-browser/*
 !agentic-browser/.gitkeep
+opencode-data/*
+!opencode-data/.gitkeep
 
 CLAUDE.local.md

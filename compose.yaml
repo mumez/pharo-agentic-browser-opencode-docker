@@ -24,3 +24,4 @@ services:
     volumes:
       - ./screenshots:/root/screenshots
       - ./agentic-browser:/root/smalltalk-interop/agentic-browser
+      - ./opencode-data:/root/.local/share/opencode

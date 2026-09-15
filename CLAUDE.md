@@ -75,6 +75,7 @@ Entrypoint chain: `ab-entrypoint.sh` (symlinks `opencode` if needed, runs `seed-
 | --- | --- | --- |
 | `./agentic-browser` | `/root/smalltalk-interop/agentic-browser` | Topic cwds (`<title>-<uuid>/`), `topic-template`, `ab-topics.fuel`, `ab-settings.json`. Gitignored except `.gitkeep`; `seed-agentic-browser.sh` re-seeds `topic-template` and `ab-settings.json` individually from `seed/` (baked into the image) if this bind-mount hides/empties them. |
 | `./screenshots` | `/root/screenshots` | Interop + AgenticBrowser screenshots. |
+| `./opencode-data` | `/root/.local/share/opencode` | OpenCode's session database (`opencode.db`). Without this mount, recreating the container (e.g. `run.sh`'s `docker rm -f`) wipes OpenCode's sessions while `ab-topics.fuel` (under `./agentic-browser`) still references them, so AgenticBrowser's "resume session" fails. See README's Session persistence section. |
 | `./repos` | `/root/repos` | Only mounted by `run.sh`, not by `compose.yaml`. |
 
 AgenticBrowser's Web UI can only point topics at working directories **under** `agentic-browser/` inside the container — not arbitrary paths. For a project cloned elsewhere, the working directory must be set once via Spec2 (noVNC) or the Playground, not through the Web UI.

@@ -32,13 +32,14 @@ docker compose up -d
 Or, without cloning this repo at all, pull and run it directly:
 
 ```bash
-mkdir -p agentic-browser screenshots
+mkdir -p agentic-browser screenshots opencode-data
 docker pull ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
 docker run --name pharo-ab-opencode01 -d \
     -p 6901:6901 -p 8080:8080 -p 8086:8086 \
     -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
     -v "$PWD/screenshots:/root/screenshots" \
+    -v "$PWD/opencode-data:/root/.local/share/opencode" \
     ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
 ```
 
@@ -73,6 +74,7 @@ Once you've built the image, you can use `./run_local.sh` to start the container
 | --- | --- |
 | `./agentic-browser` | Where your source repositories live. AgenticBrowser topics work inside this tree, and it's where you clone/place the project(s) you want to develop. |
 | `./screenshots` | Where screenshots taken from Pharo/AgenticBrowser are saved. |
+| `./opencode-data` | OpenCode's own session database (`opencode.db`). Bind-mounted so ACP sessions survive a container restart/recreate — see [Session persistence](#session-persistence) below. |
 
 The first time you start the container, a `topic-template` directory is created under `./agentic-browser` if it doesn't already exist. It holds the configuration that lets OpenCode use `smalltalk-dev-plugin` (skills/commands) inside each topic.
 
@@ -101,6 +103,11 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
   Requires `OPENCODE_SERVER_PASSWORD` to be set and port `4096` published (uncomment it in `compose.yaml`, or add `-p 4096:4096` to the `docker run` above) before exposing it.
 
   Replace `pharo-ab-opencode01` with your container's name if you're not running against the default.
+
+## Session persistence
+
+AgenticBrowser's topic/session bookkeeping (`ab-topics.fuel`) lives under `./agentic-browser`.
+OpenCode's sessions are saved under `./opencode-data`. As long as you keep these files, sessions survive container recreation. 
 
 ## Security notes
 
