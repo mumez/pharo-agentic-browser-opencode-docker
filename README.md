@@ -7,7 +7,7 @@ As long as Docker is installed, you can start developing right away. The contain
 - **Pharo** ([AgenticBrowser](https://github.com/mumez/pharo-agentic-browser) + [SmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer))
 - **OpenCode** ([smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin))
 
-The only thing you need to bring is your coding agent's credentials (e.g. an Anthropic API key).
+The only thing you need to bring is your coding agent's credentials (e.g. an Anthropic, and/or other provider API keys).
 
 ## Setup
 
