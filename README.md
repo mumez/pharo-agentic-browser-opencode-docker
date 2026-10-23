@@ -8,6 +8,7 @@ As long as Docker is installed, you can start developing right away. The contain
 - **OpenCode** ([smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin))
 
 The only thing you need to bring is your coding agent's credentials (e.g. an Anthropic, and/or other provider API keys).
+API keys are usually billed pay-as-you-go, though some providers also offer subscription plans. Please check each provider's terms.
 
 ## Setup
 
@@ -43,7 +44,7 @@ docker run --name pharo-ab-opencode01 -d \
     ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
 ```
 
-Add other provider keys (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`) or `-u "$(id -u):$(id -g)"` (to keep created files host-owned) as needed — see the env vars documented in `.env.example` if you clone the repo for reference.
+Add other provider keys (`OPENCODE_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`) or `-u "$(id -u):$(id -g)"` (to keep created files host-owned) as needed — see the env vars documented in `.env.example` if you clone the repo for reference.
 
 ### Option B: Build locally
 
