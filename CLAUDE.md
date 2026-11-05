@@ -52,7 +52,7 @@ There is no lint/test suite in this repo; "verification" means rebuilding the im
 
 Multi-stage build:
 1. **`webui` stage** (`node:22-bookworm-slim`): clones `pharo-agentic-browser-web-ui` (branch pinned by `WEBUI_REF`, default `develop`) and runs `npm ci && npm run build`. Only the built `assets/agentic-browser` dir is copied into the final image.
-2. **Final stage** (`FROM mumez/pharo-vnc-supervisor`): installs `uv`, OpenCode CLI, clones `smalltalk-dev-plugin` (branch pinned by `PLUGIN_REF`), copies the checked-in `seed/` dir to `/opt/repo-seed`, runs `scripts/prepare-topic-template.sh` to seed the OpenCode topic template with plugin skills/commands and then overlay `seed/topic-template/` on top (deliberately **no MCP config** in the template — see below), bakes `seed/ab-settings.json` in as the default AgenticBrowser settings, pre-warms the two Smalltalk MCP server `uvx` caches, then does a headless Pharo build (`setup.sh`, `save-pharo.sh metacello install ...`) to load `PharoSmalltalkInteropServer` and `AgenticBrowser` (group `all`) into the saved image.
+2. **Final stage** (`FROM mumez/pharo-vnc-supervisor:pharo140`): installs `uv`, OpenCode CLI, clones `smalltalk-dev-plugin` (branch pinned by `PLUGIN_REF`), copies the checked-in `seed/` dir to `/opt/repo-seed`, runs `scripts/prepare-topic-template.sh` to seed the OpenCode topic template with plugin skills/commands and then overlay `seed/topic-template/` on top (deliberately **no MCP config** in the template — see below), bakes `seed/ab-settings.json` in as the default AgenticBrowser settings, pre-warms the two Smalltalk MCP server `uvx` caches, then does a headless Pharo build (`setup.sh`, `save-pharo.sh metacello install ...`, then `scripts/install-agentic-browser.st`) to load `PharoSmalltalkInteropServer` and `AgenticBrowser` (group `all`) into the saved image. `save-pharo.sh` exits 0 even when the load fails, so a successful build doesn't prove the packages loaded; check that the container boots.
 
 ## Customizing the topic template and AgenticBrowser settings
 
@@ -76,9 +76,19 @@ Entrypoint chain: `ab-entrypoint.sh` (symlinks `opencode` if needed, runs `seed-
 | `./agentic-browser` | `/root/smalltalk-interop/agentic-browser` | Topic cwds (`<title>-<uuid>/`), `topic-template`, `ab-topics.fuel`, `ab-settings.json`. Gitignored except `.gitkeep`; `seed-agentic-browser.sh` re-seeds `topic-template` and `ab-settings.json` individually from `seed/` (baked into the image) if this bind-mount hides/empties them. |
 | `./screenshots` | `/root/screenshots` | Interop + AgenticBrowser screenshots. |
 | `./opencode-data` | `/root/.local/share/opencode` | OpenCode's session database (`opencode.db`). Without this mount, recreating the container (e.g. `run.sh`'s `docker rm -f`) wipes OpenCode's sessions while `ab-topics.fuel` (under `./agentic-browser`) still references them, so AgenticBrowser's "resume session" fails. See README's Session persistence section. |
+| `./crit-data` | `/root/.crit` | crit's review data. Without this mount, recreating the container loses in-progress reviews. |
 | `./repos` | `/root/repos` | Only mounted by `run.sh`, not by `compose.yaml`. |
 
 AgenticBrowser's Web UI can only point topics at working directories **under** `agentic-browser/` inside the container — not arbitrary paths. For a project cloned elsewhere, the working directory must be set once via Spec2 (noVNC) or the Playground, not through the Web UI.
+
+## crit
+
+The image installs the `crit` release binary pinned by `CRIT_VERSION`. AgenticBrowser spawns it per topic, on a port from `critPortRange`. These pieces depend on each other:
+
+- `critAllowUnauthenticatedNetwork` must stay `true` in `seed/ab-settings.json`. crit has to listen on `0.0.0.0` inside the container for Docker's port publishing to reach it.
+- `critPortRange` in `seed/ab-settings.json` must match the range published in `compose.yaml` and `run.sh` (`9080-9100`).
+- The host side publishes those ports on `CRIT_BIND_ADDRESS`, which defaults to `0.0.0.0` to match the Web UI, so a review opened from a LAN browser is reachable. crit has no authentication; set `127.0.0.1` to restrict it to the host.
+- `safe.directory '*'` is set system-wide because a root container sees bind-mounted repos as owned by another user, and crit then reports "Not in a version-controlled repository".
 
 ## Secrets
 

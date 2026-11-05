@@ -5,5 +5,7 @@ agentic-browser/*
 !agentic-browser/.gitkeep
 opencode-data/*
 !opencode-data/.gitkeep
+crit-data/*
+!crit-data/.gitkeep
 
 CLAUDE.local.md

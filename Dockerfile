@@ -12,7 +12,7 @@ RUN git clone --depth 1 --branch "${WEBUI_REF}" "${WEBUI_REPO}" . \
   && npm ci \
   && npm run build
 
-FROM mumez/pharo-vnc-supervisor
+FROM mumez/pharo-vnc-supervisor:pharo140
 LABEL maintainer="Masashi Umezawa <ume@softumeya.com>"
 
 ARG SMALLTALK_INTEROP_DIR=/root/smalltalk-interop
@@ -20,6 +20,7 @@ ARG INTEROP_REPOS_URL=github://mumez/PharoSmalltalkInteropServer:main/src
 ARG AGENTIC_BROWSER_REPOS_URL=github://mumez/pharo-agentic-browser:main/src
 ARG PLUGIN_REPO=https://github.com/mumez/smalltalk-dev-plugin.git
 ARG PLUGIN_REF=develop
+ARG CRIT_VERSION=v0.23.2
 
 ENV PATH="/usr/local/bin:/root/.opencode/bin:/root/.local/bin:${PATH}"
 ENV PHARO_RIPPLE_PORT=8080
@@ -38,6 +39,18 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/b
   ln -s /root/.opencode/bin/opencode /usr/local/bin/opencode; \
   fi
 
+# Install crit (AgenticBrowser's "Review by crit"). Topic directories are
+# bind-mounted, so their owner can differ from the container user; without
+# safe.directory, git (and so crit) refuses to work in them.
+RUN arch="$(dpkg --print-architecture)" \
+  && cd /tmp \
+  && curl -fsSLO "https://github.com/tomasz-tomczyk/crit/releases/download/${CRIT_VERSION}/crit-linux-${arch}" \
+  && curl -fsSLO "https://github.com/tomasz-tomczyk/crit/releases/download/${CRIT_VERSION}/checksums.txt" \
+  && grep " crit-linux-${arch}\$" checksums.txt | sha256sum -c - \
+  && install -m 0755 "crit-linux-${arch}" /usr/local/bin/crit \
+  && rm "crit-linux-${arch}" checksums.txt \
+  && git config --system --add safe.directory '*'
+
 COPY ./seed /opt/repo-seed
 COPY scripts/prepare-topic-template.sh /tmp/prepare-topic-template.sh
 RUN chmod +x /tmp/prepare-topic-template.sh \
@@ -47,9 +60,11 @@ RUN chmod +x /tmp/prepare-topic-template.sh \
   && (timeout 90 uvx --from git+https://github.com/mumez/smalltalk-interop-mcp-server.git smalltalk-interop-mcp-server --help || true) \
   && (timeout 90 uvx --from git+https://github.com/mumez/smalltalk-validator-mcp-server.git@main smalltalk-validator-mcp-server --help || true)
 
+COPY scripts/install-agentic-browser.st /tmp/install-agentic-browser.st
 RUN PHARO_MODE=headless setup.sh \
-  && PHARO_MODE=headless save-pharo.sh metacello install ${INTEROP_REPOS_URL} BaselineOfPharoSmalltalkInteropServer \
-  && PHARO_MODE=headless save-pharo.sh metacello install ${AGENTIC_BROWSER_REPOS_URL} BaselineOfAgenticBrowser --groups=all \
+  && PHARO_MODE=headless save-pharo.sh metacello install ${INTEROP_REPOS_URL} PharoSmalltalkInteropServer \
+  && PHARO_MODE=headless save-pharo.sh st --save --quit /tmp/install-agentic-browser.st \
+  && rm /tmp/install-agentic-browser.st \
   && cp -r /root/data ${SMALLTALK_INTEROP_DIR} \
   && mkdir -p /root/screenshots \
   ${SMALLTALK_INTEROP_DIR}/agentic-browser \
@@ -71,7 +86,8 @@ RUN chmod +x /usr/local/bin/seed-agentic-browser.sh /usr/local/bin/ab-entrypoint
 # root-owned from the build, and /run, /var/log/supervisor default to
 # root:root, so any other UID needs explicit rwX to read/write its own
 # home, Pharo image, OpenCode state, and supervisord's pid/socket/logs.
-RUN chmod -R a+rwX /root \
+RUN mkdir -p /root/.crit \
+  && chmod -R a+rwX /root \
   && chmod a+rwX /run /var/log/supervisor
 
 ENV HOME=/root
@@ -81,8 +97,8 @@ ENV PHARO_SIS_SCREENSHOT_DIR=/root/screenshots
 ENV PHARO_START_SCRIPT=${SMALLTALK_INTEROP_DIR}/config/startup.st
 ENV PHARO_RIPPLE_ASSETS_DIR=${SMALLTALK_INTEROP_DIR}/assets
 
-VOLUME ["${PHARO_SIS_SCREENSHOT_DIR}", "${SMALLTALK_INTEROP_DIR}/agentic-browser", "/root/.local/share/opencode"]
-EXPOSE 8080 8086
+VOLUME ["${PHARO_SIS_SCREENSHOT_DIR}", "${SMALLTALK_INTEROP_DIR}/agentic-browser", "/root/.local/share/opencode", "/root/.crit"]
+EXPOSE 8080 8086 9080-9100
 
 ENTRYPOINT ["/usr/local/bin/ab-entrypoint.sh"]
 CMD ["supervisord"]

@@ -10,7 +10,7 @@ fi
 IMAGE="${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}"
 CONTAINER_NAME="${CONTAINER_NAME:-pharo-ab-opencode01}"
 
-mkdir -p "$PWD/screenshots" "$PWD/agentic-browser" "$PWD/opencode-data"
+mkdir -p "$PWD/screenshots" "$PWD/agentic-browser" "$PWD/opencode-data" "$PWD/crit-data"
 
 docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
@@ -20,6 +20,7 @@ docker run --name "$CONTAINER_NAME" -d \
     -p 6901:6901 \
     -p 8080:8080 \
     -p 8086:8086 \
+    -p "${CRIT_BIND_ADDRESS:-0.0.0.0}:9080-9100:9080-9100" \
     -e PHARO_SIS_PORT=8086 \
     -e PHARO_RIPPLE_PORT=8080 \
     -e PHARO_RIPPLE_BIND_ADDRESS=0.0.0.0 \
@@ -33,4 +34,5 @@ docker run --name "$CONTAINER_NAME" -d \
     -v "$PWD/screenshots:/root/screenshots" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
     -v "$PWD/opencode-data:/root/.local/share/opencode" \
+    -v "$PWD/crit-data:/root/.crit" \
     "$IMAGE"

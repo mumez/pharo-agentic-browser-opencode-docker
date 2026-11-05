@@ -33,14 +33,16 @@ docker compose up -d
 Or, without cloning this repo at all, pull and run it directly:
 
 ```bash
-mkdir -p agentic-browser screenshots opencode-data
+mkdir -p agentic-browser screenshots opencode-data crit-data
 docker pull ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
 docker run --name pharo-ab-opencode01 -d \
     -p 6901:6901 -p 8080:8080 -p 8086:8086 \
+    -p 9080-9100:9080-9100 \
     -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" \
     -v "$PWD/agentic-browser:/root/smalltalk-interop/agentic-browser" \
     -v "$PWD/screenshots:/root/screenshots" \
     -v "$PWD/opencode-data:/root/.local/share/opencode" \
+    -v "$PWD/crit-data:/root/.crit" \
     ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest
 ```
 
@@ -76,6 +78,7 @@ Once you've built the image, you can use `./run_local.sh` to start the container
 | `./agentic-browser` | Where your source repositories live. AgenticBrowser topics work inside this tree, and it's where you clone/place the project(s) you want to develop. |
 | `./screenshots` | Where screenshots taken from Pharo/AgenticBrowser are saved. |
 | `./opencode-data` | OpenCode's own session database (`opencode.db`). Bind-mounted so ACP sessions survive a container restart/recreate — see [Session persistence](#session-persistence) below. |
+| `./crit-data` | crit's review data (`~/.crit`). Bind-mounted so reviews survive a container recreate. |
 
 The first time you start the container, a `topic-template` directory is created under `./agentic-browser` if it doesn't already exist. It holds the configuration that lets OpenCode use `smalltalk-dev-plugin` (skills/commands) inside each topic.
 
@@ -105,6 +108,16 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 
   Replace `pharo-ab-opencode01` with your container's name if you're not running against the default.
 
+### Code review with crit
+
+[crit](https://github.com/tomasz-tomczyk/crit) is included, and **Use crit review** is on by default, so you can review the agent's changes in your browser and send comments back to it. See AgenticBrowser's [crit guide](https://github.com/mumez/pharo-agentic-browser/blob/main/docs/use-crit.md) for the review flow.
+
+- The topic's working directory must be a git repository with changes to review. The review button is hidden otherwise, and topic directories aren't git repositories unless you or the agent run `git init`.
+- Each review gets a port from `9080-9100`, published on all host interfaces like the Web UI. If you change `critPortRange` in the settings, publish the new range too.
+- Starting a review from the VNC UI can't open a browser for you. Copy the `Crit review: http://localhost:<port>/` URL from the topic's conversation into your host browser.
+- To allow only the host itself, set `CRIT_BIND_ADDRESS=127.0.0.1` in `.env` (see [Security notes](#security-notes)). `run.sh` and Compose both read it.
+- If `./agentic-browser/ab-settings.json` already exists from an earlier version, it's kept as is. Turn on **Use crit review** in the Settings dialog over VNC, or set `"useCrit": true` in that file and restart the container.
+
 ## Session persistence
 
 AgenticBrowser's topic/session bookkeeping (`ab-topics.fuel`) lives under `./agentic-browser`.
@@ -114,6 +127,7 @@ OpenCode's sessions are saved under `./opencode-data`. As long as you keep these
 
 - Never put API keys in `opencode.json` or bake them into the image. Keys only flow through `.env` (gitignored) → container environment → OpenCode reads them directly.
 - The AgenticBrowser Web UI (`:8080`) has **no authentication**. It's meant for LAN/localhost use only — do not expose it to the internet.
+- crit (`:9080-9100`) has **no authentication**, and anyone who can reach it can read the diff and send review comments to the topic's agent. Like the Web UI, it's meant for LAN/localhost use only — do not expose it to the internet. Set `CRIT_BIND_ADDRESS=127.0.0.1` to restrict it to the host.
 - Don't publish OpenCode's own web server (`:4096`) without setting `OPENCODE_SERVER_PASSWORD` first.
 
 ## Customizing OpenCode (`opencode.json`)

@@ -8,6 +8,9 @@ services:
       - "6901:6901"
       - "8080:8080"
       - "8086:8086"
+      # crit review servers (AgenticBrowser's default critPortRange). crit has no
+      # authentication; set CRIT_BIND_ADDRESS=127.0.0.1 to keep them on loopback.
+      - "${CRIT_BIND_ADDRESS:-0.0.0.0}:9080-9100:9080-9100"
       # Optional OpenCode web UI (start it yourself; set OPENCODE_SERVER_PASSWORD):
       # - "4096:4096"
     environment:
@@ -25,3 +28,4 @@ services:
       - ./screenshots:/root/screenshots
       - ./agentic-browser:/root/smalltalk-interop/agentic-browser
       - ./opencode-data:/root/.local/share/opencode
+      - ./crit-data:/root/.crit
