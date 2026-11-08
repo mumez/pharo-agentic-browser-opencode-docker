@@ -12,11 +12,10 @@ RUN git clone --depth 1 --branch "${WEBUI_REF}" "${WEBUI_REPO}" . \
   && npm ci \
   && npm run build
 
-FROM mumez/pharo-vnc-supervisor:pharo140
+FROM mumez/pharo-vnc-supervisor
 LABEL maintainer="Masashi Umezawa <ume@softumeya.com>"
 
 ARG SMALLTALK_INTEROP_DIR=/root/smalltalk-interop
-ARG INTEROP_REPOS_URL=github://mumez/PharoSmalltalkInteropServer:main/src
 ARG AGENTIC_BROWSER_REPOS_URL=github://mumez/pharo-agentic-browser:main/src
 ARG PLUGIN_REPO=https://github.com/mumez/smalltalk-dev-plugin.git
 ARG PLUGIN_REF=develop
@@ -62,7 +61,6 @@ RUN chmod +x /tmp/prepare-topic-template.sh \
 
 COPY scripts/install-agentic-browser.st /tmp/install-agentic-browser.st
 RUN PHARO_MODE=headless setup.sh \
-  && PHARO_MODE=headless save-pharo.sh metacello install ${INTEROP_REPOS_URL} PharoSmalltalkInteropServer \
   && PHARO_MODE=headless save-pharo.sh st --save --quit /tmp/install-agentic-browser.st \
   && rm /tmp/install-agentic-browser.st \
   && cp -r /root/data ${SMALLTALK_INTEROP_DIR} \
