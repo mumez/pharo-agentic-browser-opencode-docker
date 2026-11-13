@@ -1,0 +1,6 @@
+# AgenticBrowser crit integration
+.crit.config.json
+
+# smalltalk-dev-plugin files copied in at image build time
+.opencode/commands/st-*.md
+.agents/skills/smalltalk-*/
