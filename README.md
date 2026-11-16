@@ -112,11 +112,12 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 
 [crit](https://github.com/tomasz-tomczyk/crit) is included, and **Use crit review** is on by default, so you can review the agent's changes in your browser and send comments back to it. See AgenticBrowser's [crit guide](https://github.com/mumez/pharo-agentic-browser/blob/main/docs/use-crit.md) for the review flow.
 
-- The topic's working directory must be a git repository with changes to review. The review button is hidden otherwise, and topic directories aren't git repositories unless you or the agent run `git init`.
+> NOTE: If `./agentic-browser` was created by an earlier version, your `ab-settings.json` and `topic-template/` are kept as is, so crit won't work yet. The old `ab-settings.json` has no `useCrit` entry, which counts as `false`, and the old `topic-template/` lacks the `.gitignore` that keeps crit's `.crit.config.json` and the plugin's files out of reviews. Run `ab-update-seed` to bring them up to date (see [Updating seed files after an upgrade](#updating-seed-files-after-an-upgrade)), then restart the container.
+
+- The topic's working directory must be *a git repository*. The review button is hidden otherwise, and topic directories aren't git repositories unless you or the agent run `git init`.
 - Each review gets a port from `9080-9100`, published on all host interfaces like the Web UI. If you change `critPortRange` in the settings, publish the new range too.
 - Starting a review from the VNC UI can't open a browser for you. Copy the `Crit review: http://localhost:<port>/` URL from the topic's conversation into your host browser.
 - To allow only the host itself, set `CRIT_BIND_ADDRESS=127.0.0.1` in `.env` (see [Security notes](#security-notes)). `run.sh` and Compose both read it.
-- If `./agentic-browser` was created by an earlier version, your `ab-settings.json` and `topic-template/` are kept as is, so crit won't work yet. The old `ab-settings.json` has no `useCrit` entry, which counts as `false`, and the old `topic-template/` lacks the `.gitignore` that keeps crit's `.crit.config.json` and the plugin's files out of reviews. Run `ab-update-seed` to bring them up to date (see [Updating seed files after an upgrade](#updating-seed-files-after-an-upgrade)), then restart the container.
 
 ## Updating seed files after an upgrade
 
@@ -170,7 +171,7 @@ There are a few ways to apply it, from most to least permanent:
    ```bash
    OPENCODE_CONFIG=/root/smalltalk-interop/agentic-browser/opencode.json
    ```
-   With Docker Compose or `run.sh`, set it in `.env` and restart (`docker compose up -d` / `./run.sh`) — both auto-load `.env`. Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
+   With Docker Compose or `run.sh`, set it in `.env` and restart (`docker compose up -d` or `./run.sh`) — both auto-load `.env`. Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
 
 ## Relation to smalltalk-interop-docker
 
