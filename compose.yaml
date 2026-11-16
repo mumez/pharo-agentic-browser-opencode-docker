@@ -2,6 +2,9 @@ services:
   pharo-agentic-browser-opencode:
     image: ${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}
     container_name: pharo-ab-opencode01
+    # The base image (mumez/pharo-vnc-supervisor) is published for linux/amd64 only;
+    # Apple Silicon runs it under emulation.
+    platform: ${PLATFORM:-linux/amd64}
     user: "${HOST_UID:-0}:${HOST_GID:-0}"
     ports:
       - "5900:5900"

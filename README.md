@@ -14,7 +14,7 @@ API keys are usually billed pay-as-you-go, though some providers also offer subs
 
 ### Option A: Pull the pre-built docker image from GHCR
 
-> Note: the pre-built image is for AMD64. If you are using Apple Silicon (Mac ARM64), please follow Option B.
+> Note: the image (and its base image `mumez/pharo-vnc-supervisor`) is available for `linux/amd64` only. On Apple Silicon (Mac ARM64), `run.sh`, `build_run.sh`, and `compose.yaml` pin `PLATFORM=linux/amd64`, so it runs under emulation. Enable "Use Rosetta for x86_64/amd64 emulation" in Docker Desktop for better performance.
 
 Please edit `.env` first and execute `run.sh`, which automatically load `.env`:
 
@@ -193,7 +193,7 @@ Pick **smalltalk-interop-docker** if you already have a coding agent on your hos
 - VNC settings: [ubuntu-vnc-supervisor](https://github.com/mumez/ubuntu-vnc-supervisor). Pharo image settings: [pharo-vnc-supervisor](https://github.com/mumez/pharo-vnc-supervisor).
 - If `docker compose build` fails with `driver not connecting` (Docker Desktop / BuildKit), fall back to the legacy builder:
   ```bash
-  DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker .
+  DOCKER_BUILDKIT=0 docker build --platform linux/amd64 -t pharo-agentic-browser-opencode-docker .
   docker compose up -d --no-build
   ```
 

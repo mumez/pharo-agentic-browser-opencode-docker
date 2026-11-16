@@ -38,7 +38,7 @@ docker compose -f compose.yaml -f compose.build.yaml up -d --build
 ./run.sh
 
 # If BuildKit fails with "driver not connecting" (Docker Desktop):
-DOCKER_BUILDKIT=0 docker build -t pharo-agentic-browser-opencode-docker .
+DOCKER_BUILDKIT=0 docker build --platform linux/amd64 -t pharo-agentic-browser-opencode-docker .
 docker compose -f compose.yaml -f compose.build.yaml up -d --no-build
 
 # Exec into the running container

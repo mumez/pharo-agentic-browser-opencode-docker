@@ -9,12 +9,15 @@ fi
 
 IMAGE="${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}"
 CONTAINER_NAME="${CONTAINER_NAME:-pharo-ab-opencode01}"
+# The image is linux/amd64-only (emulated on Apple Silicon).
+PLATFORM="${PLATFORM:-linux/amd64}"
 
 mkdir -p "$PWD/screenshots" "$PWD/agentic-browser" "$PWD/opencode-data" "$PWD/crit-data"
 
 docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
 docker run --name "$CONTAINER_NAME" -d \
+    --platform "$PLATFORM" \
     --user "$(id -u):$(id -g)" \
     -p 5900:5900 \
     -p 6901:6901 \
