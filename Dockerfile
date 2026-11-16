@@ -76,8 +76,9 @@ COPY ./scripts/seed-agentic-browser.sh /usr/local/bin/seed-agentic-browser.sh
 COPY ./scripts/ab-entrypoint.sh /usr/local/bin/ab-entrypoint.sh
 COPY ./scripts/opencode-cli.sh /usr/local/bin/opencode-cli
 COPY ./scripts/opencode-web.sh /usr/local/bin/opencode-web
+COPY ./scripts/update-seed.sh /usr/local/bin/ab-update-seed
 RUN chmod +x /usr/local/bin/seed-agentic-browser.sh /usr/local/bin/ab-entrypoint.sh \
-  /usr/local/bin/opencode-cli /usr/local/bin/opencode-web
+  /usr/local/bin/opencode-cli /usr/local/bin/opencode-web /usr/local/bin/ab-update-seed
 
 # Allow the container to run as an arbitrary non-root UID/GID (see run.sh
 # --user / compose.yaml's HOST_UID/HOST_GID): everything under /root is

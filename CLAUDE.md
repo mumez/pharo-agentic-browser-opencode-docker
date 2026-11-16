@@ -60,6 +60,7 @@ Multi-stage build:
 - `scripts/prepare-topic-template.sh` runs `setup-opencode.sh` to generate skills/commands, then copies `seed/topic-template/` on top, so anything placed there always wins.
 - `seed/ab-settings.json` is copied verbatim into the image as the default `agentic-browser/ab-settings.json` (no MCP-merging logic — it already ships with `useDefaultMcpServers: false` and `OpenCode` first in `codingAgents`, see below).
 - At runtime, `scripts/seed-agentic-browser.sh` re-seeds `topic-template/` and `ab-settings.json` from the image into `agentic-browser/` individually, only when each is missing — so a host bind-mount that already has its own customized file is never overwritten.
+- To pull seed changes into an existing host `agentic-browser/` after an upgrade, users run `ab-update-seed` (`scripts/update-seed.sh`) manually. It merges `ab-settings.json` with jq (new seed keys are added, the user's values win; `--replace` takes the seed verbatim) and replaces differing `topic-template/` files. Changed files are backed up to `ab-settings.json.orig` and `topic-template.orig/`, outside the template so backups don't leak into new topics. When you add a new setting that existing users need, mention `ab-update-seed` in the README rather than adding manual copy steps.
 
 Key ARGs for pinning upstream versions: `WEBUI_REPO`/`WEBUI_REF`, `AGENTIC_BROWSER_REPOS_URL`, `PLUGIN_REPO`/`PLUGIN_REF`.
 

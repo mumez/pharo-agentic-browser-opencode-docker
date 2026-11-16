@@ -116,18 +116,22 @@ Create a topic, pick OpenCode as the agent, and start chatting. This covers most
 - Each review gets a port from `9080-9100`, published on all host interfaces like the Web UI. If you change `critPortRange` in the settings, publish the new range too.
 - Starting a review from the VNC UI can't open a browser for you. Copy the `Crit review: http://localhost:<port>/` URL from the topic's conversation into your host browser.
 - To allow only the host itself, set `CRIT_BIND_ADDRESS=127.0.0.1` in `.env` (see [Security notes](#security-notes)). `run.sh` and Compose both read it.
-- If `./agentic-browser/ab-settings.json` already exists from an earlier version, it's kept as is. It has none of the crit settings, so crit stays off: a missing `useCrit` counts as `false`. Add these three entries to that file and restart the container:
-  ```json
-  "useCrit" : true,
-  "critAllowUnauthenticatedNetwork" : true,
-  "critPortRange" : "9080-9100",
-  ```
-  All three are needed. `critAllowUnauthenticatedNetwork` lets crit listen on `0.0.0.0` inside the container, which Docker's port publishing requires. `critPortRange` must match the published `9080-9100` range.
-- If `./agentic-browser/topic-template/` already exists from an earlier version, it's also kept as is, so it lacks the `.gitignore` that crit needs. That file keeps crit's per-topic `.crit.config.json` and the plugin's skill/command files out of the review. Copy it from the image while the container is running:
-  ```bash
-  docker cp pharo-ab-opencode01:/opt/agentic-browser-seed/topic-template/.gitignore ./agentic-browser/topic-template/.gitignore
-  ```
-  If you already have your own `topic-template/.gitignore`, merge its entries in by hand instead. Topics created before this change don't get the file either, so copy it into each topic directory you want to review as well.
+- If `./agentic-browser` was created by an earlier version, your `ab-settings.json` and `topic-template/` are kept as is, so crit won't work yet. The old `ab-settings.json` has no `useCrit` entry, which counts as `false`, and the old `topic-template/` lacks the `.gitignore` that keeps crit's `.crit.config.json` and the plugin's files out of reviews. Run `ab-update-seed` to bring them up to date (see [Updating seed files after an upgrade](#updating-seed-files-after-an-upgrade)), then restart the container.
+
+## Updating seed files after an upgrade
+
+On startup, the container copies `ab-settings.json` and `topic-template/` into `./agentic-browser` only if they're missing, so it never overwrites your copies. When a newer image ships changes to them, apply the changes with `ab-update-seed`:
+
+```bash
+docker exec pharo-ab-opencode01 ab-update-seed --dry-run   # show what would change
+docker exec pharo-ab-opencode01 ab-update-seed
+docker restart pharo-ab-opencode01                         # reload ab-settings.json
+```
+
+- **`ab-settings.json`** is merged: settings new in the image are added, and the values you already have are kept. To take the image's file as is, use `--replace`.
+- **`topic-template/`**: each file that differs from the image's version is replaced. Files that exist only in your copy are left alone.
+- Anything changed is backed up first, to `ab-settings.json.orig` and `topic-template.orig/<file>`. If a backup from an earlier run exists, a timestamp is appended.
+- Topics you already created keep their own copies of the template files. Only new topics get the updated ones, so copy any file you need (e.g. `.gitignore`) into an existing topic directory yourself.
 
 ## Session persistence
 
