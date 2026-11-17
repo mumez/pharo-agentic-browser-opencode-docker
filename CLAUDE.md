@@ -93,4 +93,4 @@ The image installs the `crit` release binary pinned by `CRIT_VERSION`. AgenticBr
 
 ## Secrets
 
-Never bake provider API keys into the image or into `opencode.json`. Keys flow only via `.env` (gitignored) → compose interpolation or `run.sh`'s auto-load → container environment → OpenCode reads them directly (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`). `OPENCODE_SERVER_PASSWORD` is required before ever exposing port `4096` (`opencode web`) or the Web UI (`:8080`, which has no auth and is LAN/localhost-only by design).
+Never bake provider API keys into the image or into `opencode.json`. Keys flow only via `.env` (gitignored) → compose interpolation or `run.sh`'s auto-load → container environment → OpenCode reads them directly (`OPENCODE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`). `OPENCODE_SERVER_PASSWORD` is required before ever exposing port `4096` (`opencode web`) or the Web UI (`:8080`, which has no auth and is LAN/localhost-only by design).

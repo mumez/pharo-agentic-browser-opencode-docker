@@ -159,19 +159,47 @@ To change the default model, add MCP servers, or add/configure providers for top
 }
 ```
 
-- **Default model**: set `model` / `small_model` (`provider/model-id`).
+- **Default model**: set `model` / `small_model` (`provider/model-id`). See [Changing the default model](#changing-the-default-model).
 - **Add a provider**: add an entry under `provider` (e.g. custom base URL, extra models). Never put API keys here — see [Security notes](#security-notes); keys still flow only through `.env`.
 - **Add MCP servers**: add entries under `mcp`.
 
 There are a few ways to apply it, from most to least permanent:
 
-1. **Baked into the image**: place the file at `seed/topic-template/opencode.json` (create it if it doesn't exist) and rebuild (`docker compose up -d --build`). Files under `seed/topic-template/` are copied on top of the generated template last, so this always wins. This is the way to go if you want the customization to survive rebuilds and be the default for new checkouts.
+1. **Baked into the image**: edit the existing `seed/topic-template/opencode.json` and rebuild (`docker compose -f compose.yaml -f compose.build.yaml up -d --build`). Files under `seed/topic-template/` are copied on top of the generated template last, so this always wins. This is the way to go if you want the customization to survive rebuilds and be the default for new checkouts.
 2. **Directly on the host, no rebuild**: if `./agentic-browser/topic-template/` already exists (created on first boot), just edit `./agentic-browser/topic-template/opencode.json` there directly — it's bind-mounted, so the container sees the change immediately for new topics. Quick to iterate with, but local to your checkout and not tracked in this repo.
 3. **`OPENCODE_CONFIG` env var**: point OpenCode at a config file without touching `topic-template/` at all. The path is resolved inside the container, so put the file under `./agentic-browser` (already bind-mounted) and reference its container-side path:
    ```bash
    OPENCODE_CONFIG=/root/smalltalk-interop/agentic-browser/opencode.json
    ```
    With Docker Compose or `run.sh`, set it in `.env` and restart (`docker compose up -d` or `./run.sh`) — both auto-load `.env`. Either way, no rebuild needed. This overrides config for every topic uniformly, which is handy for a one-off override but less flexible than editing `topic-template/opencode.json` per topic.
+
+### Changing the default model
+
+The seeded `topic-template/opencode.json` sets both `model` and `small_model` to `opencode/big-pickle`, a free model served by OpenCode. It lets you check that everything works before you set any API key:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {},
+  "model": "opencode/big-pickle",
+  "small_model": "opencode/big-pickle"
+}
+```
+
+For real work, you'll normally replace these with models from the provider whose API key you put in `.env`:
+
+| `.env` key | Example `model` |
+| --- | --- |
+| `OPENCODE_API_KEY` | `opencode/glm-5` |
+| `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-5` |
+| `OPENAI_API_KEY` | `openai/<model-id>` |
+| `OPENROUTER_API_KEY` | `openrouter/<model-id>` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | `google/<model-id>` |
+
+- `model` is the main model used for coding. `small_model` is used for lightweight tasks such as generating session titles, so a cheaper, faster model from the same provider is usually a good fit.
+- The value format is `provider/model-id`. Look up the exact provider and model IDs at [models.dev](https://models.dev/), the model catalog OpenCode uses.
+- Apply the change with any of the methods above. Editing `./agentic-browser/topic-template/opencode.json` affects only topics created afterwards; existing topics keep their own copy of `opencode.json`, so edit that file in the topic directory if needed.
+- To check which models are available with your keys, `docker exec -it pharo-ab-opencode01 opencode models` will show the list.
 
 ## Relation to smalltalk-interop-docker
 
