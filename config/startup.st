@@ -1,3 +1,2 @@
-SisServer current start.
+1 seconds wait.
 AgenticBrowser open.
-AgenticBrowser startWebUI.

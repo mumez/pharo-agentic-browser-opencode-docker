@@ -2,12 +2,18 @@ services:
   pharo-agentic-browser-opencode:
     image: ${IMAGE:-ghcr.io/mumez/pharo-agentic-browser-opencode-docker:latest}
     container_name: pharo-ab-opencode01
+    # The base image (mumez/pharo-vnc-supervisor) is published for linux/amd64 only;
+    # Apple Silicon runs it under emulation.
+    platform: ${PLATFORM:-linux/amd64}
     user: "${HOST_UID:-0}:${HOST_GID:-0}"
     ports:
       - "5900:5900"
       - "6901:6901"
       - "8080:8080"
       - "8086:8086"
+      # crit review servers (AgenticBrowser's default critPortRange). crit has no
+      # authentication; set CRIT_BIND_ADDRESS=127.0.0.1 to keep them on loopback.
+      - "${CRIT_BIND_ADDRESS:-0.0.0.0}:9080-9100:9080-9100"
       # Optional OpenCode web UI (start it yourself; set OPENCODE_SERVER_PASSWORD):
       # - "4096:4096"
     environment:
@@ -25,3 +31,4 @@ services:
       - ./screenshots:/root/screenshots
       - ./agentic-browser:/root/smalltalk-interop/agentic-browser
       - ./opencode-data:/root/.local/share/opencode
+      - ./crit-data:/root/.crit
