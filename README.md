@@ -134,18 +134,6 @@ docker restart pharo-ab-opencode01                         # reload ab-settings.
 - Anything changed is backed up first, to `ab-settings.json.orig` and `topic-template.orig/<file>`. If a backup from an earlier run exists, a timestamp is appended.
 - Topics you already created keep their own copies of the template files. Only new topics get the updated ones, so copy any file you need (e.g. `.gitignore`) into an existing topic directory yourself.
 
-## Session persistence
-
-AgenticBrowser's topic/session bookkeeping (`ab-topics.fuel`) lives under `./agentic-browser`.
-OpenCode's sessions are saved under `./opencode-data`. As long as you keep these files, sessions survive container recreation. 
-
-## Security notes
-
-- Never put API keys in `opencode.json` or bake them into the image. Keys only flow through `.env` (gitignored) → container environment → OpenCode reads them directly.
-- The AgenticBrowser Web UI (`:8080`) has **no authentication**. It's meant for LAN/localhost use only — do not expose it to the internet.
-- crit (`:9080-9100`) has **no authentication**, and anyone who can reach it can read the diff and send review comments to the topic's agent. Like the Web UI, it's meant for LAN/localhost use only — do not expose it to the internet. Set `CRIT_BIND_ADDRESS=127.0.0.1` to restrict it to the host.
-- Don't publish OpenCode's own web server (`:4096`) without setting `OPENCODE_SERVER_PASSWORD` first.
-
 ## Customizing OpenCode (`opencode.json`)
 
 To change the default model, add MCP servers, or add/configure providers for topics started via AgenticBrowser, you can customize `opencode.json`. Common changes:
@@ -200,6 +188,18 @@ For real work, you'll normally replace these with models from the provider whose
 - The value format is `provider/model-id`. Look up the exact provider and model IDs at [models.dev](https://models.dev/), the model catalog OpenCode uses.
 - Apply the change with any of the methods above. Editing `./agentic-browser/topic-template/opencode.json` affects only topics created afterwards; existing topics keep their own copy of `opencode.json`, so edit that file in the topic directory if needed.
 - To check which models are available with your keys, `docker exec -it pharo-ab-opencode01 opencode models` will show the list.
+
+## Session persistence
+
+AgenticBrowser's topic/session bookkeeping (`ab-topics.fuel`) lives under `./agentic-browser`.
+OpenCode's sessions are saved under `./opencode-data`. As long as you keep these files, sessions survive container recreation. 
+
+## Security notes
+
+- Never put API keys in `opencode.json` or bake them into the image. Keys only flow through `.env` (gitignored) → container environment → OpenCode reads them directly.
+- The AgenticBrowser Web UI (`:8080`) has **no authentication**. It's meant for LAN/localhost use only — do not expose it to the internet.
+- crit (`:9080-9100`) has **no authentication**, and anyone who can reach it can read the diff and send review comments to the topic's agent. Like the Web UI, it's meant for LAN/localhost use only — do not expose it to the internet. Set `CRIT_BIND_ADDRESS=127.0.0.1` to restrict it to the host.
+- Don't publish OpenCode's own web server (`:4096`) without setting `OPENCODE_SERVER_PASSWORD` first.
 
 ## Relation to smalltalk-interop-docker
 
