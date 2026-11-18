@@ -153,8 +153,8 @@ To change the default model, add MCP servers, or add/configure providers for top
 
 There are a few ways to apply it, from most to least permanent:
 
-1. **Baked into the image**: edit the existing `seed/topic-template/opencode.json` and rebuild (`docker compose -f compose.yaml -f compose.build.yaml up -d --build`). Files under `seed/topic-template/` are copied on top of the generated template last, so this always wins. This is the way to go if you want the customization to survive rebuilds and be the default for new checkouts.
-2. **Directly on the host, no rebuild**: if `./agentic-browser/topic-template/` already exists (created on first boot), just edit `./agentic-browser/topic-template/opencode.json` there directly — it's bind-mounted, so the container sees the change immediately for new topics. Quick to iterate with, but local to your checkout and not tracked in this repo.
+1. **Directly on the host, no rebuild**: if `./agentic-browser/topic-template/` already exists (created on first boot), just edit `./agentic-browser/topic-template/opencode.json` there directly — it's bind-mounted, so the container sees the change immediately for new topics. Quick to iterate with, but local to your checkout and not tracked in this repo.
+2. **Baked into the image**: edit the existing `seed/topic-template/opencode.json` and [rebuild](#option-b-build-locally). Files under `seed/topic-template/` are copied on top of the generated template last, so this always wins. This is the way to go if you want the customization to survive rebuilds and be the default for new checkouts.
 3. **`OPENCODE_CONFIG` env var**: point OpenCode at a config file without touching `topic-template/` at all. The path is resolved inside the container, so put the file under `./agentic-browser` (already bind-mounted) and reference its container-side path:
    ```bash
    OPENCODE_CONFIG=/root/smalltalk-interop/agentic-browser/opencode.json
